@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from routers import router_general
 from routers import router_watches
 from models import model_watch
+import database
 
 app = FastAPI()
 
@@ -16,12 +17,6 @@ app.include_router(router_watches.router)
 model_watch.Base.metadata.create_all(bind=engine)
 
 
-def get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
 
 class Watch(BaseModel):
@@ -33,12 +28,12 @@ class Watch(BaseModel):
 
 
 @app.get("/watches/get")
-def read_api(db: Session = Depends(get_db)):
+def read_api(db: Session = Depends(database.get_db)):
     return db.query(model_watch.Watch).all()
 
 
 @app.post("/watches/add")
-def add_watch(watch: Watch, db: Session = Depends(get_db)):
+def add_watch(watch: Watch, db: Session = Depends(database.get_db)):
     
     new_watch = model_watch.Watch()
     new_watch.brand = watch.brand
